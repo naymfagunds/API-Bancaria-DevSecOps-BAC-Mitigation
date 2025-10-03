@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Este arquivo é carregado pelo server.js, mas o CSS e o JS são compartilhados -->
+    <title>iLoveMyBank - Painel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Este é o Painel de Controle Principal do Usuário -->
+    <section id="dashboard-screen">
+        <h2 id="nome-usuario">Bem-vindo(a), Cliente!</h2>
+
+        <!-- Área de Saldo (Onde o charme ciano aparece) -->
+        <div id="trofeu-do-saldo">
+            <p>Seu Saldo Disponível:</p>
+            <span id="valor-saldo-brabo">R$ 0,00</span>
+        </div>
+
+        <hr style="margin: 20px 0; border-color: #eee;">
+<h3>Transferência Imediata</h3>
+<!-- ESTE DEVE SER O FORMULÁRIO DE TRANSFERÊNCIA NO painel.html -->
+<form id="transfer-form" onsubmit="handleTransferSubmit(event)">
+    <label for="toId">ID do Destinatário:</label>
+    <input type="text" id="toId" name="toId" required>
+
+    <label for="valor">Valor (R$):</label>
+    <input type="number" id="valor" name="valor" step="0.01" required>
+
+    <button type="submit">Transferir</button>
+</form>
+
+<!-- BOTÃO DE LOGOUT -->
+<button id="btn-logout">Sair</button>
+    </section>
+
+    <!-- O script.js deve ser carregado no final para garantir que o DOM esteja pronto -->
+    <script src="script.js"></script>
+</body>
+</html>
