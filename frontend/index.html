@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iLoveMyBank - Login</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <header>
+        <h1>iLoveMyBank</h1>
+    </header>
+
+    <div id="message-box" class="message-box" style="display: none;">
+        <p id="message-text"></p>
+    </div>
+
+    <main>
+        <section id="login-screen" class="login-container">
+            <h2>LOGIN DO CLIENTE</h2>
+
+  <form id="login-form" onsubmit="handleLoginSubmit(event)">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" required>
+                
+                <button type="submit">Logar</button>
+
+                <p id="login-message" class="error-message"></p>
+            </form>
+        </section>
+
+        <section id="dashboard-screen" class="dashboard-container" style="display: none;">
+            <h2>Bem-vindo, <span id="nome-usuario"></span>!</h2>
+            
+            <div id="saldo-info">
+                <p>Saldo Atual:</p>
+                <span id="valor-saldo">R$ 0,00</span>
+            </div>
+
+            <h3>Transferência Imediata</h3>
+            <form id="transfer-form" onsubmit="handleTransferSubmit(event)">
+                <div class="input-group">
+                    <label for="destinatario">Nome de Usuário do Destinatário:</label>
+                    <input type="text" id="destinatario" name="destinatario" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="valor-transferencia">Valor (R$):</label>
+                    <input type="number" id="valor-transferencia" name="valor" step="0.01" required>
+                </div>
+                
+                <button type="submit">Transferir</button>
+            </form>
+            
+            <button id="logout-btn">Sair</button>
+        </section>
+    </main>
+
+    <script src="script.js"></script> 
+</body>
+</html>
