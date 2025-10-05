@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const express = require('express');
 const bodyParser = require('body-parser'); 
 const jwt = require('jsonwebtoken'); // Adiciona import do JWT aqui
@@ -72,3 +73,23 @@ app.listen(PORT, () => {
 });
 
 // Nota: A rota de /api/transferir está INJETADA aqui para evitar erros de require.
+=======
+
+
+const express = require('express');
+const { validarCrachaDeAcesso } = require('./security_modules/auth'); 
+const transacaoRoutes = require('./routes/transacao'); // O módulo de rotas
+
+const app = express();
+// ... (setup do express e body-parser)
+
+// [...] Rota de LOGIN (Onde GERA o JWT)
+
+// ROTA PROTEGIDA (Onde a mágica acontece!)
+// O 'validarCrachaDeAcesso' age como um guarda antes do 'transacaoRoutes'
+app.use('/api', validarCrachaDeAcesso, transacaoRoutes); 
+
+// INICIA O SERVIDOR
+
+// ... app.listen(...)
+>>>>>>> 7166166770f3389dd9ea4c6605134e734679190e
