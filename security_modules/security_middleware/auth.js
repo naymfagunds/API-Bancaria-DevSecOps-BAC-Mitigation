@@ -1,86 +1,41 @@
-<<<<<<< HEAD
-// security_modules/security_middleware/auth.js
-
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-// A CHAVE SECRETA DEVE VIR DE VARIÁVEIS DE AMBIENTE (.env)!
+// Chave secreta que deve ser a mesma usada para assinar o JWT no server.js
 const JWT_SECRET = process.env.JWT_SECRET || 'sua_chave_secreta_muito_forte'; 
 
 /**
- * Middleware Zero-Trust:
- * Garante que a identidade seja extraída SOMENTE do Token JWT.
+ * Middleware para validar o JWT (Zero-Trust) e injetar a identidade do usuário na requisição.
+ * Mitiga Broken Access Control (BAC) ao garantir que a identidade do usuário seja extraída
+ * de uma fonte CONFIÁVEL (o token assinado) e não do corpo da requisição.
  */
-const ensureIdentityFromToken = (req, res, next) => {
-    // 1. Tenta extrair o token do Header 'Authorization'
-    const authHeader = req.headers.authorization;
+const validarCrachaDeAcesso = (req, res, next) => {
+    // 1. Pega o token do header 'Authorization'
+    const authHeader = req.headers['authorization'];
+    
+    // Formato esperado: "Bearer [TOKEN]"
+    const token = authHeader && authHeader.split(' ')[1]; 
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        // 401 Unauthorized
-        return res.status(401).json({ message: 'Acesso negado. Token não fornecido.' }); 
+    if (token == null) {
+        console.warn(`[DEFESA BAC] Acesso negado: Token ausente.`);
+        return res.status(401).json({ message: 'Acesso negado. Token de acesso JWT necessário.' });
     }
 
-    const token = authHeader.split(' ')[1];
-
-    try {
-        // 2. Verifica o token
-        const decoded = jwt.verify(token, JWT_SECRET);
-
-        // 3. INJEÇÃO ZERO-TRUST: Armazena a identidade segura para uso na rota.
-        req.user = { 
-            id: decoded.id,
-            username: decoded.username 
-        };
-
-        next();
-
-    } catch (error) {
-        // 401 Unauthorized (Token inválido ou expirado)
-        return res.status(401).json({ message: 'Token inválido ou expirado.' });
-    }
+    // 2. Verifica e decodifica o token
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            console.error(`[DEFESA BAC] Falha na verificação do token: ${err.message}`);
+            // Token expirado, inválido, etc.
+            return res.status(403).json({ message: 'Token de acesso inválido ou expirado.' });
+        }
+        
+        // 3. Sucesso: Injeta o payload do usuário (identidade confiável) na requisição
+        req.user = user; 
+        console.log(`[DEFESA BAC] Acesso concedido para User ID: ${user.id}`);
+        
+        // Continua para o próximo middleware ou manipulador de rota
+        next(); 
+    });
 };
 
-module.exports = ensureIdentityFromToken;
-=======
-
-const jwt = require('jsonwebtoken');
-
-// IMPORTANTE: A CHAVE SECRETA DEVE VIR DE VARIÁVEIS DE AMBIENTE (.env)!
-const JWT_SECRET = process.env.JWT_SECRET || 'sua_chave_secreta_muito_forte'; 
-
-/**
- * Middleware Zero-Trust para Broken Access Control (BAC):
- * Garante que a identidade do usuário seja extraída APENAS do Token JWT.
- * Ignora e anula qualquer tentativa de forjar o ID pelo req.body.
- */
-const ensureIdentityFromToken = (req, res, next) => {
-    // Tenta extrair o token do Header 'Authorization'
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        // Encerra: 401 Unauthorized
-        return res.status(401).json({ message: 'Acesso negado. Token não fornecido.' }); 
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    try {
-        // Verifica o token usando a chave secreta
-        const decoded = jwt.verify(token, JWT_SECRET);
-
-        // INJEÇÃO ZERO-TRUST: Usa a identidade segura do token.
-        // O código da rota deve USAR APENAS req.user.username.
-        req.user = { 
-            id: decoded.id,
-            username: decoded.username 
-        };
-
-        next(); // Continua para a lógica de negócio
-
-    } catch (error) {
-        // Encerra: 401 Unauthorized (Token inválido ou expirado)
-        return res.status(401).json({ message: 'Token inválido ou expirado.' });
-    }
-};
-
-module.exports = ensureIdentityFromToken;
->>>>>>> 7166166770f3389dd9ea4c6605134e734679190e
+module.exports = validarCrachaDeAcesso;

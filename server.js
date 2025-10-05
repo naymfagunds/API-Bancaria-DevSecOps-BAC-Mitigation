@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const express = require('express');
 const bodyParser = require('body-parser'); 
 const jwt = require('jsonwebtoken'); // Adiciona import do JWT aqui
@@ -6,7 +5,7 @@ require('dotenv').config();
 
 // IMPORTAÇÕES
 const validarCrachaDeAcesso = require('./security_modules/security_middleware/auth'); 
-// A linha abaixo foi COMENTADA para eliminar o erro de require() persistente:
+// A linha abaixo foi COMENTADA para eliminar conflitos e injetar a rota no server.js:
 // const transacaoRoutes = require('./rotas-seguras'); 
 
 // ----------------------------------------------------
@@ -22,6 +21,7 @@ app.use(bodyParser.json());
 
 // Rota de LOGIN (Gera o JWT - Mockup)
 app.post('/login', (req, res) => {
+    // Atenção: Use uma chave secreta real em produção!
     const JWT_SECRET = process.env.JWT_SECRET || 'sua_chave_secreta_muito_forte'; 
 
     const userPayload = {
@@ -37,16 +37,16 @@ app.post('/login', (req, res) => {
 
 // --- ROTAS PROTEGIDAS (MITIGAÇÃO BAC) ---
 
-// ROTA PROTEGIDA INJETADA (Elimina o problema de require)
+// ROTA PROTEGIDA COM O MIDDLEWARE DE DEFESA BAC
 // O Middleware 'validarCrachaDeAcesso' age antes do manipulador de rota.
 app.post('/api/transferir', validarCrachaDeAcesso, (req, res) => {
     // 1. DADO CONFIÁVEL: Pega a identidade do usuário do JWT (injetado pelo Middleware)
     const secureUserId = req.user.id; 
     
-    // 2. DADO NÃO CONFIÁVEL: Pega dados do Body.
+    // 2. DADO NÃO CONFIÁVEL: Pega dados do Body (e ignora qualquer ID de usuário malicioso).
     const { amount, recipientId, attemptedUserId } = req.body; 
 
-    // 3. ENFORCEMENT BAC: Ignora qualquer ID de usuário que venha do Body.
+    // 3. ENFORCEMENT BAC: Validação básica
     if (!amount || !recipientId) {
         return res.status(400).json({ message: "É necessário fornecer a quantia e o destinatário." });
     }
@@ -71,25 +71,3 @@ app.listen(PORT, () => {
     console.log(`2. Use o token em http://localhost:${PORT}/api/transferir (POST) para testar a defesa BAC.`);
     console.log(`\n========================================================================\n`);
 });
-
-// Nota: A rota de /api/transferir está INJETADA aqui para evitar erros de require.
-=======
-
-
-const express = require('express');
-const { validarCrachaDeAcesso } = require('./security_modules/auth'); 
-const transacaoRoutes = require('./routes/transacao'); // O módulo de rotas
-
-const app = express();
-// ... (setup do express e body-parser)
-
-// [...] Rota de LOGIN (Onde GERA o JWT)
-
-// ROTA PROTEGIDA (Onde a mágica acontece!)
-// O 'validarCrachaDeAcesso' age como um guarda antes do 'transacaoRoutes'
-app.use('/api', validarCrachaDeAcesso, transacaoRoutes); 
-
-// INICIA O SERVIDOR
-
-// ... app.listen(...)
->>>>>>> 7166166770f3389dd9ea4c6605134e734679190e
